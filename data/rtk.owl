@@ -115,21 +115,15 @@
     
 
 
-    <!-- http://ke.course/rtk#母亲 -->
-
-    <owl:ObjectProperty rdf:about="http://ke.course/rtk#母亲"/>
-    
-
-
     <!-- http://ke.course/rtk#涉及人物 -->
 
     <owl:ObjectProperty rdf:about="http://ke.course/rtk#涉及人物"/>
     
 
 
-    <!-- http://ke.course/rtk#父亲 -->
+    <!-- http://ke.course/rtk#父母 -->
 
-    <owl:ObjectProperty rdf:about="http://ke.course/rtk#父亲"/>
+    <owl:ObjectProperty rdf:about="http://ke.course/rtk#父母"/>
     
 
 

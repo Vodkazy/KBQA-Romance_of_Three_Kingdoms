@@ -7,8 +7,9 @@
   @ Software : PyCharm
 """
 import json
-import sys;
-reload(sys);
+import sys
+import re
+reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
@@ -41,11 +42,41 @@ for item in fr:
             if years[1] != u'？':
                 fw.write(iri + '<http://ke.course/rtk#死亡年份>   \"' + years[1] + "\"^^<http://www.w3.org/2001/XMLSchema#date>   .\n")
 
-        # 对象属性:效忠势力、古代籍贯
+        # 对象属性：效忠势力、古代籍贯
         if property_name == u'效忠势力' and item[property_name] != 'None':
             fw.write(iri + '<http://ke.course/rtk#效忠势力>   <http://ke.course/rtk#' + item[property_name] + ">   .\n")
         if property_name == u'古代籍贯' and item[property_name] != 'None':
             fw.write(iri + '<http://ke.course/rtk#古代籍贯>   <http://ke.course/rtk#' + item[property_name] + ">   .\n")
+
+
+    # 潜在属性：别名
+    pattern = re.compile(u'‘([\u4e00-\u9fa5]+)‘')
+    if pattern.findall(item[u'介绍']) != [] :
+        if item[u'姓名'] not in [u'刘宏[汉灵帝]',u'苗泽',u'杨琦',u'臧旻',u'张机',u'蔡琰',u'曹芳',u'曹休',u'曹植',u'郭女王',u'刘馥',u'夏侯恩',u'夏侯令女',u'徐庶',u'荀彧',u'关银屏',u'黄月英',u'诸葛瞻',u'丁奉',u'鲁肃',u'陆景',u'华雄',u'李儒',u'张尚[西晋]']:
+            fw.write(iri + '<http://ke.course/rtk#别名>   \"' + pattern.findall(item[u'介绍'])[0] + "\"   .\n")
+
+
+    # 潜在属性：父母兄弟姐妹子女配偶
+    # 父母
+    pattern = re.compile(item[u'姓名'][0] + u'([\u4e00-\u9fa5]+)之([子女]+)')
+    if pattern.findall(item[u'介绍']) != [] and len(pattern.findall(item[u'介绍'])[0][0]) < 4 and item[u'姓名'][0]+pattern.findall(item[u'介绍'])[0][0]!=item[u'姓名']:
+        # print item[u'姓名'] + '   ' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[-1]
+        fw.write(iri + '<http://ke.course/rtk#父母>   <http://ke.course/rtk#' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[0][0] + ">   .\n")
+    # 子女
+    pattern = re.compile(item[u'姓名'][0] + u'([\u4e00-\u9fa5]+)之([父母]+)')
+    if pattern.findall(item[u'介绍']) != [] and len(pattern.findall(item[u'介绍'])[0][0]) < 4 and item[u'姓名'][0]+pattern.findall(item[u'介绍'])[0][0]!=item[u'姓名']:
+        if item[u'姓名'] == u'曹腾':
+            fw.write(iri + '<http://ke.course/rtk#子女>   <http://ke.course/rtk#曹嵩>   .\n')
+            continue
+        # print item[u'姓名'] + '   ' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[-1]
+        fw.write(iri + '<http://ke.course/rtk#子女>   <http://ke.course/rtk#' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[0][0] + ">   .\n")
+    # 兄弟
+    pattern = re.compile(item[u'姓名'][0] + u'([\u4e00-\u9fa5]+)之([兄弟]+)')
+    if pattern.findall(item[u'介绍']) != [] and len(pattern.findall(item[u'介绍'])[0][0]) < 4 and item[u'姓名'][0] + pattern.findall(item[u'介绍'])[0][0] != item[u'姓名']:
+        # print item[u'姓名'] + '   ' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[-1]
+        fw.write(iri + '<http://ke.course/rtk#兄弟>   <http://ke.course/rtk#' + item[u'姓名'][0] + pattern.findall(item[u'介绍'])[0][0] + ">   .\n")
+
+
 fw.close()
 
 
@@ -75,7 +106,7 @@ for item in fr:
             else:
                 fw.write(iri + '<http://ke.course/rtk#' + str(property_name) + ">   \"" + item[property_name] + "\"   .\n")
 
-        # 对象属性:事件地点、对应章节、涉及人物
+        # 对象属性：事件地点、对应章节、涉及人物
         if property_name == u'地点' and item[property_name] != 'None':
             fw.write(iri + '<http://ke.course/rtk#事件地点>   <http://ke.course/rtk#' + item[property_name] + ">   .\n")
         if property_name == u'章节' and item[property_name] != 'None':
@@ -84,3 +115,123 @@ for item in fr:
             for name in item[property_name]:
                 fw.write(iri + '<http://ke.course/rtk#涉及人物>   <http://ke.course/rtk#' + name + ">   .\n")
 fw.close()
+
+
+# 生成 地点 的三元组
+path = open('../data/dataset/person.json')
+fr = json.load(path,encoding='utf-8')
+path.close()
+visited_place = {}
+fw = open('../data/dataset/triple_place.nt','w')
+# 州郡
+for item in fr:
+    zhou_pattern = re.compile(u'([\u4e00-\u9fa5]+)州')
+    jun_pattern = re.compile(u'([\u4e00-\u9fa5]+)郡')
+    if zhou_pattern.findall(item[u'古代籍贯']) != [] and visited_place.has_key(zhou_pattern.findall(item[u'古代籍贯'])[0] + u'州') == False:
+        name_zhou = zhou_pattern.findall(item[u'古代籍贯'])[0] + u'州'
+        iri = "<http://ke.course/rtk#" + name_zhou + '> '
+        fw.write(iri + '<http://ke.course/rtk#地名>   ' + "\"" + name_zhou + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/2000/01/rdf-schema#lable>   ' + "\"" + name_zhou + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#州>   .\n')
+        visited_place[name_zhou] = 1
+    if jun_pattern.findall(item[u'古代籍贯']) != [] and visited_place.has_key(jun_pattern.findall(item[u'古代籍贯'])[0] + u'郡') == False:
+        name_jun = jun_pattern.findall(item[u'古代籍贯'])[0] + u'郡'
+        iri = "<http://ke.course/rtk#" + name_jun + '> '
+        fw.write(iri + '<http://ke.course/rtk#地名>   ' + "\"" + name_jun + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/2000/01/rdf-schema#lable>   ' + "\"" + name_jun + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#郡>   .\n')
+        visited_place[name_jun] = 1
+# 普通地点
+for item in fr:
+    if item[u'古代籍贯'] != 'None' and visited_place.has_key(item[u'古代籍贯']) == False:
+        visited_place[item[u'古代籍贯']] = 1
+        # 基本属性：地名、现代地名、行政级别
+        iri = "<http://ke.course/rtk#"+str(item[u'古代籍贯'])+'> '
+        fw.write(iri + '<http://ke.course/rtk#地名>   ' + "\"" + item[u'古代籍贯'] + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/2000/01/rdf-schema#lable>   ' + "\"" + item[u'古代籍贯'] + "\"    .\n")
+        fw.write(iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#地点>   .\n')
+        fw.write(iri + '<http://ke.course/rtk#现代地名>   \"' + str(item[u'现代籍贯']) + '\"   .\n')
+        if u'郡' in item[u'古代籍贯'] and item[u'古代籍贯'][-1]!=u'郡':
+            fw.write(iri + '<http://ke.course/rtk#行政级别>   \"县\"   .\n')
+        elif u'郡' in item[u'古代籍贯']:
+            fw.write(iri + '<http://ke.course/rtk#行政级别>   \"郡\"   .\n')
+        elif u'州' in item[u'古代籍贯'] and item[u'古代籍贯'][-1]!=u'州':
+            fw.write(iri + '<http://ke.course/rtk#行政级别>   \"郡\"   .\n')
+        elif u'州' in item[u'古代籍贯']:
+            fw.write(iri + '<http://ke.course/rtk#行政级别>   \"州\"   .\n')
+        else:
+            fw.write(iri + '<http://ke.course/rtk#行政级别>   \"县\"   .\n')
+        # 对象属性：所属州、所属郡
+        zhou_pattern = re.compile(u'([\u4e00-\u9fa5]+)州')
+        jun_pattern = re.compile(u'([\u4e00-\u9fa5]+)郡')
+        if zhou_pattern.findall(item[u'古代籍贯']) != []:
+            fw.write(iri + '<http://ke.course/rtk#所属州>   <http://ke.course/rtk#' + zhou_pattern.findall(item[u'古代籍贯'])[0] + u'州' + '>  .\n')
+        if jun_pattern.findall(item[u'古代籍贯']) != [] :
+            fw.write(iri + '<http://ke.course/rtk#所属郡>   <http://ke.course/rtk#' + jun_pattern.findall(item[u'古代籍贯'])[0] + u'郡' + '>  .\n')
+
+fw.close()
+
+# 生成 势力 的三元组
+fw = open('../data/dataset/triple_power.nt','w')
+fw.write('<http://ke.course/rtk#东汉>    <http://ke.course/rtk#势力名称>   "东汉"  .\n')
+fw.write('<http://ke.course/rtk#东汉>    <http://www.w3.org/2000/01/rdf-schema#lable>   "东汉"  .\n')
+fw.write('<http://ke.course/rtk#东汉>    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#势力>  .\n')
+fw.write('<http://ke.course/rtk#东汉>    <http://ke.course/rtk#建立时间>   "25"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.write('<http://ke.course/rtk#东汉>    <http://ke.course/rtk#灭亡时间>   "220"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+
+fw.write('<http://ke.course/rtk#魏>    <http://ke.course/rtk#势力名称>   "魏"  .\n')
+fw.write('<http://ke.course/rtk#魏>    <http://www.w3.org/2000/01/rdf-schema#lable>   "魏"  .\n')
+fw.write('<http://ke.course/rtk#魏>    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#势力>  .\n')
+fw.write('<http://ke.course/rtk#魏>    <http://ke.course/rtk#建立时间>   "213"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.write('<http://ke.course/rtk#魏>    <http://ke.course/rtk#灭亡时间>   "266"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+
+fw.write('<http://ke.course/rtk#蜀>    <http://ke.course/rtk#势力名称>   "蜀"  .\n')
+fw.write('<http://ke.course/rtk#蜀>    <http://www.w3.org/2000/01/rdf-schema#lable>   "蜀"  .\n')
+fw.write('<http://ke.course/rtk#蜀>    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#势力>  .\n')
+fw.write('<http://ke.course/rtk#蜀>    <http://ke.course/rtk#建立时间>   "221"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.write('<http://ke.course/rtk#蜀>    <http://ke.course/rtk#灭亡时间>   "263"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+
+fw.write('<http://ke.course/rtk#吴>    <http://ke.course/rtk#势力名称>   "吴"  .\n')
+fw.write('<http://ke.course/rtk#吴>    <http://www.w3.org/2000/01/rdf-schema#lable>   "吴"  .\n')
+fw.write('<http://ke.course/rtk#吴>    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#势力>  .\n')
+fw.write('<http://ke.course/rtk#吴>    <http://ke.course/rtk#建立时间>   "229"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.write('<http://ke.course/rtk#吴>    <http://ke.course/rtk#灭亡时间>   "280"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+
+fw.write('<http://ke.course/rtk#西晋>    <http://ke.course/rtk#势力名称>   "西晋"  .\n')
+fw.write('<http://ke.course/rtk#西晋>    <http://www.w3.org/2000/01/rdf-schema#lable>   "西晋"  .\n')
+fw.write('<http://ke.course/rtk#西晋>    <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#势力>  .\n')
+fw.write('<http://ke.course/rtk#西晋>    <http://ke.course/rtk#建立时间>   "266"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.write('<http://ke.course/rtk#西晋>    <http://ke.course/rtk#灭亡时间>   "316"^^<http://www.w3.org/2001/XMLSchema#date>  .\n')
+fw.close()
+
+
+# 生成 官职 三元组
+fw = open('../data/dataset/triple_office.nt','w')
+offices = ['后军校尉','大将军','侍郎','中常侍','司徒','宦官','郡丞','刺史','太守','车骑将军','县令','长史','武威将军','侍中','太医令','太傅','部将','仆射','征西将军','谋士','都尉','太尉','司隶校尉','镇东将军','太常卿','主簿','议郎','辅国将军','副将','武卫将军','中郎将','龙骧将军','平北将军','黄门侍郎','扬威将军','骠骑将军']
+for office in offices:
+    iri = "<http://ke.course/rtk#" + office + '> '
+    fw.write(iri + '<http://ke.course/rtk#官职名称>   ' + "\"" + office + "\"    .\n")
+    fw.write(iri + '<http://www.w3.org/2000/01/rdf-schema#lable>   ' + "\"" + office + "\"    .\n")
+    fw.write(iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#官职>   .\n')
+fw.close()
+
+
+# 生成 章节 三元组
+fr = open('../data/dataset/chapter.txt','r')
+fw = open('../data/dataset/triple_chapter.nt','w')
+cnt = 1
+for line in fr.readlines():
+    s = line.split(' ')
+    iri = "<http://ke.course/rtk#" + s[1] + "_" +s[2].replace('\n','').replace('\r','') + '> '
+    fw.write(iri + '<http://ke.course/rtk#章节编号>   ' + "\"" + str(cnt) + "\"^^<http://www.w3.org/2001/XMLSchema#>    .\n")
+    fw.write(iri + '<http://ke.course/rtk#章节标题>   ' + "\"" + s[1] + "_" +s[2].replace('\n','').replace('\r','') + "\"    .\n")
+    fw.write(iri + '<http://www.w3.org/2000/01/rdf-schema#lable>   ' + "\"" + s[1] + "_" +s[2].replace('\n','').replace('\r','') + "\"    .\n")
+    fw.write(iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>   <http://ke.course/rtk#章节>   .\n')
+    cnt += 1
+fw.close()
+fr.close()
+
+# TODO：补全三元组
+# 对象属性：击败、致死
+# 对象属性：主公、主要将领
+# 对象属性：参战势力、胜利势力、失败势力、参战人物、死亡人物

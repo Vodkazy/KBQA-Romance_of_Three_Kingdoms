@@ -1,0 +1,4 @@
+<http://ke.course/rtk#曹豹>	<http://ke.course/rtk#姓名>	"曹豹"
+<http://ke.course/rtk#东汉>	<http://ke.course/rtk#政权名>	"东汉"
+<http://ke.course/rtk#东汉>	<http://ke.course/rtk#政权别称>	"东汉"
+<http://ke.course/rtk#兖州陈留郡圉>	<http://ke.course/rtk#地名>	"兖州陈留郡圉"

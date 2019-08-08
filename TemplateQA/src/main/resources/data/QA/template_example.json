@@ -1,0 +1,83 @@
+[
+  {
+    "name":"whichChapter",
+    "slotList":["event_name","event_property","chapter_property"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select distinct ?value where {<event_name> <http://ke.course/rtk#对应章节> _:a . _:a  <chapter_property> ?value.}",
+    "param":["value"],
+    "info": "某事件出现在第几章节",
+    "reply": "出现在《#value》章节中"
+  },{
+    "name":"howManyRelatedPerson",
+    "slotList":["event_name","event_property"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select (count(?value) as ?sum) where {<event_name> <http://ke.course/rtk#涉及人物> ?value. }",
+    "param":["sum"],
+    "info": "某事件涉及到人物的数量",
+    "reply": "#sum"
+  },{
+    "name":"whichRelatedPerson",
+    "slotList":["event_name","event_property"],
+    "slotmap": {},
+    "Triggers":["哪几个"],
+    "regex":"",
+    "sparql": "select ?value where {<event_name> <event_property> ?value. }",
+    "param":["value"],
+    "info": "某事件涉及到的人物是哪几个",
+    "reply": "#value"
+  },{
+    "name":"participateInWhichEvent",
+    "slotList":["person_name"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select ?value where {?value <http://ke.course/rtk#涉及人物> <person_name>. }",
+    "param":["value"],
+    "info": "某人物参与了哪些事件",
+    "reply": "#value"
+  },{
+    "name":"howManyPersonObayPower",
+    "slotList":["power_name"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select (count( distinct ?value) as ?sum) where {?value <http://ke.course/rtk#效忠势力> <power_name>. }",
+    "param":["sum"],
+    "info": "效忠于某势力的人物数量",
+    "reply": "#sum"
+  },{
+    "name":"personInfo",
+    "slotList":["person_name","person_property"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select ?value where {<person_name> <person_property> ?value . }",
+    "param":["value"],
+    "info": "给出某个人物的有关信息",
+    "reply": "#value"
+  },{
+    "name":"placeInfo",
+    "slotList":["place_name","place_property"],
+    "slotmap": {},
+    "Triggers":["州","郡","县"],
+    "regex":"",
+    "sparql": "select ?value where {<place_name> <place_property> ?value . }",
+    "param":["value"],
+    "info": "给出某个地点的有关信息",
+    "reply": "#value"
+  },{
+    "name":"powerInfo",
+    "slotList":["power_name","power_property"],
+    "slotmap": {},
+    "Triggers":[],
+    "regex":"",
+    "sparql": "select ?value where {<power_name> <power_property> ?value . }",
+    "param":["value"],
+    "info": "给出某个势力的有关信息",
+    "reply": "#value"
+  }
+]

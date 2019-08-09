@@ -33,11 +33,11 @@ public class Talk {
 
         HashMap<String, Integer> goallist = LU.getgoal(sentence);  //识别问句中各模板触发词个数
         Set<Slot> slotlist = LU.getslot(sentence); //得到可能的槽值对列表
-        //System.out.println("槽识别：\n" + Slot.DisPlayList(slotlist));
+        System.out.println("槽识别：\n" + Slot.DisPlayList(slotlist));
 
         TemplateScore templateScore;
         templateScore = TemplateManage.TempalteChoose(goallist, slotlist);
-        //System.out.println("模板识别" + templateScore.template_name);
+        System.out.println("模板识别" + templateScore.template_name);
 
         Template template = Loadsource.goalMap.get(templateScore.template_name);
 

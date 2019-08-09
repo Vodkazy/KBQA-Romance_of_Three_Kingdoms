@@ -65,7 +65,7 @@ public class Loadsource {
 				if(!slotMap.containsKey(slot)) {
 					slotMap.put(slot, new ArrayList<>());
 					slotMap.get(slot).add(goalMap.get(key).name);
-				}else{
+				} else{
 					if(!slotMap.get(slot).contains(goalMap.get(key).name)) //去重
 						slotMap.get(slot).add(goalMap.get(key).name);
 				}

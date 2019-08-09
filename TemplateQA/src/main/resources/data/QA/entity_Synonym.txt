@@ -1,2 +1,0 @@
-person_name	<http://ke.course/rtk#曹豹>	曹豹
-person_name	<http://ke.course/rtk#曹豹>	徐州四杰

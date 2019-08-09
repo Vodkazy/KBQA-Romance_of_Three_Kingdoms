@@ -80,7 +80,7 @@ public class ServiceCall {
 				temp_sparql = temp_sparql.replaceAll("<" + slotname + ">",slotIRI);
 				temp_reply = temp_reply.replaceAll("<" + slotname + ">",slotvalue);
 			}
-			//System.out.println(temp_sparql);
+			System.out.println(temp_sparql);
 			//查询
 			VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(temp_sparql, vg);
 			ResultSet results = vqe.execSelect();

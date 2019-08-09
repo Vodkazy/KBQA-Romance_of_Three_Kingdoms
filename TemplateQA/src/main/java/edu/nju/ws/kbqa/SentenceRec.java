@@ -28,7 +28,7 @@ public class SentenceRec {
      * @return
      */
     private static List<slotMode> entityRec(String question, int top_num){
-        Map<String, Set<Entity>> index = new HashMap<>();
+        Map<String, Set<Entity>> index = new HashMap<>(); // 得到以token为key，以其对应的实体集合为value的哈希列表
         for(String key:typed_entity_inverted_index.keySet()){
             for(String token:typed_entity_inverted_index.get(key).keySet()){
                 if(index.containsKey(token)){

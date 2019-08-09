@@ -32,7 +32,7 @@ public class TemplateManage {
 					System.out.println(s.name + "槽没有相关模板");
 					continue;
 				}
-				if(s.relatetemplate.size() == 1){//专有槽
+				if(s.relatetemplate.size() == 1){ //专有槽
 					//在模板意图分数表中加上模板意图，初始化分数为0
 					String intenttype = s.relatetemplate.get(0);
 					goalScoreMap.putIfAbsent(intenttype, 0.0);
